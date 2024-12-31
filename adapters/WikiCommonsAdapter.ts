@@ -33,13 +33,17 @@ export class WikiCommonsAdapter implements SiteAdapter {
       return {
         license,
         licenseUrl,
-        credits: info.extmetadata.Artist.value,
+        credits: this.stripHtmlTags(info.extmetadata.Artist.value),
         sourceWebPage: info.descriptionurl,
       };
     } catch (error) {
       console.error("Failed to fetch Commons info:", error);
     }
     return undefined;
+  }
+
+  private stripHtmlTags(html: string): string {
+    return html.replace(/<[^>]*>/g, "");
   }
 
   // It appears that every file on wikicommons has a unique file name?
