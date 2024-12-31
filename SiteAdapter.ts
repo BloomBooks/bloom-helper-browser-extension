@@ -1,4 +1,5 @@
 export interface Metadata {
+  url: string;
   licenseUrl?: string;
   license: LicenseType;
   credits: string;

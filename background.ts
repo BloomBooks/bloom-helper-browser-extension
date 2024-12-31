@@ -17,22 +17,28 @@ async function postDownloadsToBloom() {
   if (queuedDownloads.length === 0) return;
 
   try {
-    await fetch("http://localhost:5000/takeDownloads", {
+    const response = await fetch("http://localhost:5000/takeDownloads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(queuedDownloads),
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log("Posted downloads to Bloom.");
     // Clear the array after successful POST
     queuedDownloads.length = 0;
   } catch (error) {
-    console.error("Error posting to local API:", error);
+    console.error("Error posting to Bloom:", error);
   }
 }
 
 // Periodic try to deliver
-//setInterval(postDownloadsToBloom, 1000);
+setInterval(postDownloadsToBloom, 1000);
 
 function updateIcon(tabId: number, shouldEnable: boolean) {
   const iconPath =
@@ -103,22 +109,13 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
           });
         });
 
-        // Notify all instances of the popup about the queue change
-        chrome.runtime.sendMessage({
-          type: "queueChanged",
-          queuedCount: queuedDownloads.length,
-        });
-
-        chrome.runtime.sendMessage({
-          type: "downloadMessage",
-          content: JSON.stringify(metadata, null, 2),
-        });
+        postDownloadsToBloom();
       } else {
-        chrome.runtime.sendMessage({
-          type: "downloadMessage",
-          content:
-            "Bloom Downloader could not get the metadata for that image.",
-          isError: true,
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "icon.png",
+          title: "Bloom Downloader",
+          message: "Could not get the metadata for that image.",
         });
       }
     }

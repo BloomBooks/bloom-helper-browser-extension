@@ -41,6 +41,7 @@ describe("WikiCommonsAdapter", () => {
       );
 
       expect(metadata).toEqual({
+        url: "https://commons.wikimedia.org/commons/a/ab/Test.jpg",
         license: "CC-BY-SA",
         licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0",
         credits: "Test Artist",
@@ -92,6 +93,7 @@ describe("WikiCommonsAdapter", () => {
       );
 
       expect(metadata).toEqual({
+        url: "https://commons.wikimedia.org/commons/a/ab/Test.jpg",
         license: "CC-BY-SA",
         licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0",
         credits: "James Moore200",
@@ -128,6 +130,7 @@ describe("WikiCommonsAdapter", () => {
       );
 
       expect(metadata).toEqual({
+        url: "https://commons.wikimedia.org/commons/a/ab/Test.jpg",
         license: "CC-BY-SA",
         licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
         credits: "Test Artist",

@@ -27,6 +27,7 @@ export class WikiCommonsAdapter implements SiteAdapter {
         "https://commons.wikimedia.org/wiki/Commons:Licensing" // fallback if we can't figure out the license
       );
       return {
+        url,
         license,
         licenseUrl,
         credits: this.stripHtmlTags(info.extmetadata.Artist.value),
