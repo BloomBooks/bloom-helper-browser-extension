@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Download to Bloom",
+  "name": "Bloom Connector",
   "version": "0.0.0",
   "permissions": ["downloads", "tabs", "notifications"],
   "host_permissions": [
     "https://*.wikimedia.org/*",
-    "https://commons.wikimedia.org/*"
+    "https://commons.wikimedia.org/*",
+    "http://localhost:5000/*"
   ],
   "icons": {
     "16": "icon.png",
@@ -29,6 +30,12 @@
       "32": "icon-disabled.png",
       "48": "icon-disabled.png",
       "128": "icon-disabled.png"
+    },
+    "icon-when-queued": {
+      "16": "icon-when-queued.png",
+      "32": "icon-when-queued.png",
+      "48": "icon-when-queued.png",
+      "128": "icon-when-queued.png"
     }
   }
 }
