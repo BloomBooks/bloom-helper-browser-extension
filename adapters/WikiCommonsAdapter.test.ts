@@ -98,5 +98,41 @@ describe("WikiCommonsAdapter", () => {
         sourceWebPage: "https://commons.wikimedia.org/wiki/File:Test.jpg",
       });
     });
+
+    it("should handle missing licenseUrl", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        json: () =>
+          Promise.resolve({
+            query: {
+              pages: {
+                "123": {
+                  imageinfo: [
+                    {
+                      extmetadata: {
+                        LicenseShortName: { value: "CC BY-SA 4.0" },
+                        // empty license URL
+                        Artist: { value: "Test Artist" },
+                      },
+                      descriptionurl:
+                        "https://commons.wikimedia.org/wiki/File:Test.jpg",
+                    },
+                  ],
+                },
+              },
+            },
+          }),
+      });
+
+      const metadata = await adapter.getMetadata(
+        "https://commons.wikimedia.org/commons/a/ab/Test.jpg"
+      );
+
+      expect(metadata).toEqual({
+        license: "CC-BY-SA",
+        licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+        credits: "Test Artist",
+        sourceWebPage: "https://commons.wikimedia.org/wiki/File:Test.jpg",
+      });
+    });
   });
 });

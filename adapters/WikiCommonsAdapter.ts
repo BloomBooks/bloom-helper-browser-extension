@@ -1,8 +1,4 @@
-import {
-  SiteAdapter,
-  Metadata,
-  getStandardizeLicense,
-} from "../interfaces/SiteAdapter";
+import { SiteAdapter, Metadata, getStandardizeLicense } from "../SiteAdapter";
 
 export class WikiCommonsAdapter implements SiteAdapter {
   public canHandleDownload(url: string): boolean {
@@ -27,7 +23,7 @@ export class WikiCommonsAdapter implements SiteAdapter {
       console.log(JSON.stringify(info, null, 2));
       const { license, licenseUrl } = getStandardizeLicense(
         info.extmetadata.LicenseShortName.value,
-        info.extmetadata.LicenseUrl.value,
+        info.extmetadata.LicenseUrl?.value,
         "https://commons.wikimedia.org/wiki/Commons:Licensing" // fallback if we can't figure out the license
       );
       return {

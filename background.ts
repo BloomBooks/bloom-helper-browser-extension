@@ -1,6 +1,6 @@
 /// <reference types="chrome"/>
 
-import { SiteAdapter } from "./interfaces/SiteAdapter";
+import { SiteAdapter } from "./SiteAdapter";
 import { WikiCommonsAdapter } from "./adapters/WikiCommonsAdapter";
 console.log("background.ts is loaded");
 
