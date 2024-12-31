@@ -1,0 +1,21 @@
+{
+  "name": "vite-reactts-eslint-prettier",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^1.0.14",
+    "@types/chrome": "^0.0.287",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6"
+  },
+  "license": "MIT",
+  "volta": {
+    "node": "20.15.1",
+    "yarn": "1.22.19"
+  }
+}

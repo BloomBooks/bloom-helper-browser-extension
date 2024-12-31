@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Download to Bloom",
+  "version": "0.0.0",
+  "permissions": ["downloads", "tabs", "notifications"],
+  "host_permissions": [
+    "https://*.wikimedia.org/*",
+    "https://commons.wikimedia.org/*"
+  ],
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "background": {
+    "service_worker": "./background.ts"
+  },
+  "action": { "default_popup": "index.html" }
+}
