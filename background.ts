@@ -1,15 +1,8 @@
 /// <reference types="chrome"/>
 
-import { SiteAdapter } from "./SiteAdapter";
-import { WikiCommonsAdapter } from "./adapters/WikiCommonsAdapter";
 console.log("background.ts is loaded");
 
-const adapters: SiteAdapter[] = [new WikiCommonsAdapter()];
-
-const hostPatterns = adapters.flatMap((adapter) =>
-  adapter.getHostWildcardPatterns()
-);
-
+// NB: must match what the Bloom Gallery component expects
 type DownloadMetadata = {
   urlOfPage: string;
   url: string;
@@ -23,7 +16,7 @@ async function postDownloadsToBloom() {
 
   try {
     console.log(
-      "Attempting post of queue to Bloom:",
+      "Attempting post of downloads to Bloom:",
       JSON.stringify(downloads, null, 2)
     );
     const response = await fetch(
@@ -68,40 +61,39 @@ function updateIcon(tabId: number, shouldEnable: boolean) {
   }
 }
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(`onUpdated ${tabId}`, changeInfo, tab);
-  if (tab.url) {
-    const url = new URL(tab.url);
-    const shouldEnable = hostPatterns.some((pattern) => {
-      const regexp = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
-      return regexp.test(url.href);
-    });
-    updateIcon(tabId, shouldEnable);
-  }
-});
+// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+//   console.log(`onUpdated ${tabId}`, changeInfo, tab);
+//   if (tab.url) {
+//     const url = new URL(tab.url);
+//     const shouldEnable = hostPatterns.some((pattern) => {
+//       const regexp = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+//       return regexp.test(url.href);
+//     });
+//     updateIcon(tabId, shouldEnable);
+//   }
+// });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("onMessage", request);
-  if (request.type === "checkSupport") {
-    try {
-      const url = new URL(request.url);
-      const isSupported = hostPatterns.some((pattern) => {
-        const regexp = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
-        return regexp.test(url.href);
-      });
-      console.log(`URL ${url} supported: ${isSupported}`);
-      sendResponse({ isSupported });
-    } catch (e) {
-      console.error("Error checking URL support:", e);
-      sendResponse({ isSupported: false });
-    }
-  } else if (request.type === "getQueueStatus") {
-    sendResponse({ queuedCount: downloads.length });
-  }
-  return true;
-});
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//   console.log("onMessage", request);
+//   if (request.type === "checkSupport") {
+//     try {
+//       const url = new URL(request.url);
+//       const isSupported = hostPatterns.some((pattern) => {
+//         const regexp = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+//         return regexp.test(url.href);
+//       });
+//       console.log(`URL ${url} supported: ${isSupported}`);
+//       sendResponse({ isSupported });
+//     } catch (e) {
+//       console.error("Error checking URL support:", e);
+//       sendResponse({ isSupported: false });
+//     }
+//   } else if (request.type === "getQueueStatus") {
+//     sendResponse({ queuedCount: downloads.length });
+//   }
+//   return true;
+// });
 
-// Helper function to check if a URL or filename is an image
 function isImage(url: string): boolean {
   const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
   const lowerUrl = url.toLowerCase();
