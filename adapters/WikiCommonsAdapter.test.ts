@@ -37,6 +37,7 @@ describe("WikiCommonsAdapter", () => {
       });
 
       const metadata = await adapter.getMetadata(
+        "https://commons.wikimedia.org/wiki/File:Test.jpg",
         "https://commons.wikimedia.org/commons/a/ab/Test.jpg"
       );
 
@@ -53,6 +54,7 @@ describe("WikiCommonsAdapter", () => {
       global.fetch = vi.fn().mockRejectedValue(new Error("API Error"));
 
       const metadata = await adapter.getMetadata(
+        "https://commons.wikimedia.org/wiki/File:Test.jpg",
         "https://commons.wikimedia.org/commons/a/ab/Test.jpg"
       );
       expect(metadata).toBeUndefined();
@@ -89,6 +91,7 @@ describe("WikiCommonsAdapter", () => {
       });
 
       const metadata = await adapter.getMetadata(
+        "https://commons.wikimedia.org/wiki/File:Test.jpg",
         "https://commons.wikimedia.org/commons/a/ab/Test.jpg"
       );
 
@@ -126,6 +129,7 @@ describe("WikiCommonsAdapter", () => {
       });
 
       const metadata = await adapter.getMetadata(
+        "https://commons.wikimedia.org/wiki/File:Test.jpg",
         "https://commons.wikimedia.org/commons/a/ab/Test.jpg"
       );
 

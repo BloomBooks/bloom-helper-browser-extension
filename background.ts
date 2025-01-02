@@ -10,28 +10,39 @@ const hostPatterns = adapters.flatMap((adapter) =>
   adapter.getHostWildcardPatterns()
 );
 
-// Store metadata for intercepted downloads
-const queuedDownloads: any[] = [];
+type DownloadMetadata = {
+  urlOfPage: string;
+  url: string;
+  savedAtPath: string;
+  when: Date;
+};
+const downloads: DownloadMetadata[] = [];
 
 async function postDownloadsToBloom() {
-  if (queuedDownloads.length === 0) return;
+  if (downloads.length === 0) return;
 
   try {
-    const response = await fetch("http://localhost:5000/takeDownloads", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(queuedDownloads),
-    });
+    console.log(
+      "Attempting post of queue to Bloom:",
+      JSON.stringify(downloads, null, 2)
+    );
+    const response = await fetch(
+      "http://localhost:5000/image-gallery/takeDownloads",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(downloads),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    console.log("Posted downloads to Bloom.");
+    console.log("Successfully posted to Bloom.");
     // Clear the array after successful POST
-    queuedDownloads.length = 0;
+    downloads.length = 0;
   } catch (error) {
     console.error("Error posting to Bloom:", error);
   }
@@ -42,7 +53,7 @@ setInterval(postDownloadsToBloom, 1000);
 
 function updateIcon(tabId: number, shouldEnable: boolean) {
   const iconPath =
-    queuedDownloads.length > 0
+    downloads.length > 0
       ? "icon-when-queued.png"
       : shouldEnable
         ? "icon.png"
@@ -85,19 +96,69 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ isSupported: false });
     }
   } else if (request.type === "getQueueStatus") {
-    sendResponse({ queuedCount: queuedDownloads.length });
+    sendResponse({ queuedCount: downloads.length });
   }
   return true;
 });
+
+// Helper function to check if a URL or filename is an image
+function isImage(url: string): boolean {
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+  const lowerUrl = url.toLowerCase();
+  return imageExtensions.some((ext) => lowerUrl.endsWith(ext));
+}
+
+// Add download completion listener before the runtime.onMessage listener
+chrome.downloads.onDeterminingFilename.addListener(
+  async (downloadItem, suggest) => {
+    if (
+      isImage(downloadItem.url) ||
+      (downloadItem.filename && isImage(downloadItem.filename))
+    ) {
+      console.log(`Image download detected: ${downloadItem.url}`);
+
+      // Get the current tab's URL
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const currentPage = tabs[0]?.url || "";
+
+      downloads.push({
+        urlOfPage: currentPage,
+        url: downloadItem.url,
+        savedAtPath: downloadItem.filename,
+        when: new Date(),
+      });
+
+      console.log(`Queued download:`, downloads[downloads.length - 1]);
+
+      // Update icons in all tabs when queue changes
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+          if (tab.id) updateIcon(tab.id, true);
+        });
+      });
+    }
+    //suggest();
+  }
+);
+
+/* 
+In this experiment, I was preventing the download and jsut recording
 
 chrome.downloads.onCreated.addListener(async (downloadItem) => {
   console.log(`onCreated`);
   chrome.downloads.cancel(downloadItem.id);
   console.log(`Intercepted download: ${downloadItem.url}`);
 
+  // Get the current active tab's URL
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const currentPage = tabs[0]?.url;
+
   for (const adapter of adapters) {
     if (adapter.canHandleDownload(downloadItem.url)) {
-      const metadata = await adapter.getMetadata(downloadItem.url);
+      const metadata = await adapter.getMetadata(currentPage, downloadItem.url);
       if (metadata) {
         // Store the metadata in our array
         queuedDownloads.push(metadata);
@@ -122,10 +183,11 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     break;
   }
 });
+*/
 
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "GET_QUEUE_SIZE") {
-    sendResponse({ number: queuedDownloads.length });
+    sendResponse({ number: downloads.length });
   }
 });

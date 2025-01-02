@@ -1,4 +1,8 @@
-import { SiteAdapter, Metadata, getStandardizeLicense } from "../SiteAdapter";
+import { SiteAdapter, getStandardizeLicense } from "../SiteAdapter";
+import {
+  BloomMetadata,
+  BloomMetadata as Metadata,
+} from "../bloomMediaMetadata";
 
 export class WikiCommonsAdapter implements SiteAdapter {
   public canHandleDownload(url: string): boolean {
@@ -11,8 +15,11 @@ export class WikiCommonsAdapter implements SiteAdapter {
   }
 
   // given a URL of something to download, get metadata about that file and massage it into a standard format that Bloom can use
-  public async getMetadata(url: string): Promise<Metadata | undefined> {
-    const filename = this.extractFilename(url);
+  public async getMetadata(
+    sourcePageUrl: string,
+    imageUrl: string
+  ): Promise<BloomMetadata | undefined> {
+    const filename = this.extractFilename(imageUrl);
     const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&titles=File:${encodeURIComponent(filename)}&format=json&origin=*`;
 
     try {
@@ -27,11 +34,11 @@ export class WikiCommonsAdapter implements SiteAdapter {
         "https://commons.wikimedia.org/wiki/Commons:Licensing" // fallback if we can't figure out the license
       );
       return {
-        url,
+        url: imageUrl,
         license,
         licenseUrl,
         credits: this.stripHtmlTags(info.extmetadata.Artist.value),
-        sourceWebPage: info.descriptionurl,
+        sourceWebPage: sourcePageUrl,
       };
     } catch (error) {
       console.error("Failed to fetch Commons info:", error);

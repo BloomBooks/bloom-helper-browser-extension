@@ -3,11 +3,7 @@
   "name": "Bloom Connector",
   "version": "0.0.0",
   "permissions": ["downloads", "tabs", "notifications"],
-  "host_permissions": [
-    "https://*.wikimedia.org/*",
-    "https://commons.wikimedia.org/*",
-    "http://localhost:5000/*"
-  ],
+  "host_permissions": ["<all_urls>", "http://localhost:5000/*"],
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
