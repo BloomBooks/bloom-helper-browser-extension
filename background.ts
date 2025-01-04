@@ -6,7 +6,7 @@ console.log("background.ts is loaded");
 type DownloadMetadata = {
   urlOfPage: string;
   url: string;
-  savedAtPath: string;
+  filename: string;
   when: Date;
 };
 const downloads: DownloadMetadata[] = [];
@@ -104,35 +104,39 @@ function isImage(url: string): boolean {
 chrome.downloads.onDeterminingFilename.addListener(
   async (downloadItem, suggest) => {
     if (
-      isImage(downloadItem.url) ||
-      (downloadItem.filename && isImage(downloadItem.filename))
-    ) {
-      console.log(`Image download detected: ${downloadItem.url}`);
-
-      // Get the current tab's URL
-      const tabs = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const currentPage = tabs[0]?.url || "";
-
-      downloads.push({
-        urlOfPage: currentPage,
-        url: downloadItem.url,
-        savedAtPath: downloadItem.filename,
-        when: new Date(),
-      });
-
-      console.log(`Queued download:`, downloads[downloads.length - 1]);
-
-      // Update icons in all tabs when queue changes
-      chrome.tabs.query({}, (tabs) => {
-        tabs.forEach((tab) => {
-          if (tab.id) updateIcon(tab.id, true);
-        });
-      });
-    }
+      !(
+        isImage(downloadItem.url) ||
+        (downloadItem.filename && isImage(downloadItem.filename))
+      )
+    )
+      return;
     //suggest();
+    console.log(
+      `onDeterminingFilename: ${JSON.stringify(downloadItem, null, 2)}`
+    );
+
+    // Get the current tab's URL
+    const tabs = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    const currentPage = tabs[0]?.url || "";
+
+    downloads.push({
+      urlOfPage: currentPage,
+      url: downloadItem.url,
+      filename: downloadItem.filename,
+      when: new Date(),
+    });
+
+    console.log(`Queued download:`, downloads[downloads.length - 1]);
+
+    // Update icons in all tabs when queue changes
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach((tab) => {
+        if (tab.id) updateIcon(tab.id, true);
+      });
+    });
   }
 );
 
